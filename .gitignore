@@ -144,6 +144,3 @@ tags
 
 # Intellij IDEA ignore
 .idea/
-
-# Ignore dist build
-dist/
