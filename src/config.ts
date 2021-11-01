@@ -1,6 +1,7 @@
 import cwd from "cwd";
 import { existsSync } from "fs";
 import { isAbsolute, resolve } from "path";
+import { isString } from "util";
 
 class JestTestcontainersConfigError extends Error {
   constructor(msg: string) {
@@ -38,6 +39,7 @@ export interface SingleContainerConfig {
   env?: EnvironmentVariableMap;
   wait?: WaitConfig;
   bindMounts?: BindConfig[];
+  command?: string[];
 }
 
 interface PortsWaitConfig {
@@ -103,7 +105,8 @@ function assertContainerConfigIsValid({
   name,
   wait,
   env,
-  bindMounts
+  bindMounts,
+  command
 }: any): void {
   if (!image || image.constructor !== String || image.trim().length <= 0) {
     throw new JestTestcontainersConfigError("an image should be presented");
@@ -147,14 +150,22 @@ function assertContainerConfigIsValid({
     );
   }
 
+  if (
+    command != null &&
+    (!Array.isArray(command) || !command.every(isString))
+  ) {
+    throw new JestTestcontainersConfigError(
+      "Command should be a list of strings"
+    );
+  }
   assertWaitConfig(wait);
   if (bindMounts) bindMounts.every(assertBindConfig);
 }
 
 function parseContainerConfig(config: any): JestTestcontainersConfig {
   assertContainerConfigIsValid(config);
-  const { image, tag, ports, name, env, wait, bindMounts } = config;
-  const parsed = { image, tag, ports, name, env, wait, bindMounts };
+  const { image, tag, ports, name, env, wait, bindMounts, command } = config;
+  const parsed = { image, tag, ports, name, env, wait, bindMounts, command };
 
   return Object.keys(parsed).reduce(
     (acc, key) => (key !== undefined ? { ...acc, [key]: config[key] } : acc),

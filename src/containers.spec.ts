@@ -87,6 +87,30 @@ describe("containers", () => {
       expect(actualContainer.bindMounts).toEqual([]);
     });
 
+    it("should set cmd correctly", () => {
+      // Arrange
+      const config: SingleContainerConfig = {
+        image: "redis",
+        ports: [6379],
+        command: ["ls", "-a"]
+      };
+
+      // Act
+      const actualContainer: any = buildTestcontainer(config);
+
+      // Assert
+      expect(actualContainer.image).toEqual("redis");
+      expect(actualContainer.tag).toEqual("latest");
+      expect(actualContainer.ports).toEqual([6379]);
+      expect(actualContainer.env).toEqual({});
+      expect(actualContainer.cmd).toEqual(config.command);
+      expect(actualContainer.waitStrategy).toEqual(undefined);
+      expect(actualContainer.startupTimeout).toEqual(
+        new Duration(60000, TemporalUnit.MILLISECONDS)
+      );
+      expect(actualContainer.bindMounts).toEqual([]);
+    });
+
     it("should set name correctly", () => {
       // Arrange
       const config: SingleContainerConfig = {
